@@ -73,14 +73,19 @@
 
     function userRegister(){
       global $mysqli;
-      $usuario   = (!empty($_REQUEST['usuario']) ? $_REQUEST['usuario'] : '');
-      $clave     = (!empty($_REQUEST['clave']) ? $_REQUEST['clave'] : '');
+      $email      = (!empty($_REQUEST['email']) ? $_REQUEST['email'] : '');
+      $clave      = (!empty($_REQUEST['clave']) ? $_REQUEST['clave'] : '');
+      $nombre     = (!empty($_REQUEST['nombre']) ? $_REQUEST['nombre'] : '');
+      $apellido   = (!empty($_REQUEST['apellido']) ? $_REQUEST['apellido'] : '');
+      $cedula     = (!empty($_REQUEST['cedula']) ? $_REQUEST['cedula'] : '');
+      $fecha_nac  = (!empty($_REQUEST['fecha_nac']) ? $_REQUEST['fecha_nac'] : '');
 
-      $sql = "SELECT * FROM usuarios WHERE usuario = '".$usuario."'" ;
+      $sql = "SELECT * FROM usuarios WHERE usuario = '".$email."'" ;
       $result = $mysqli->query($sql);
 
 		  if ($result->num_rows==0){	
-          $query 	= '	INSERT INTO	usuarios (usuario, clave, status) VALUES ( "'.$usuario.'", "'.$clave.'", "Activo") ';
+          $query 	= '	INSERT INTO	usuarios (usuario, email, clave, status, nombre, apellido, cedula, fecha_nac) 
+                                VALUES ( "'.$email.'", "'.$email.'", "'.$clave.'", "Activo", "'.$nombre.'", "'.$apellido.'", "'.$cedula.'", "'.$fecha_nac.'") ';
           $result1 = $mysqli->query($query);
 
           if($result1 == true){
