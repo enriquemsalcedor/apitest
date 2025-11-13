@@ -31,6 +31,9 @@
     case "listFavorites":
       listFavorites();
       break;
+    case "deleteFavorites":
+      deleteFavorites();
+      break;
 		default:
       echo "{failure:true}";
       break;
@@ -130,7 +133,6 @@
       global $mysqli;
       $id     = (!empty($_REQUEST['id']) ? $_REQUEST['id'] : '');
 
-
       $query = "SELECT * FROM locaciones WHERE id = $id";
       if(!$result = $mysqli->query($query)){
         die($mysqli->error);  
@@ -183,14 +185,35 @@
     
     }
 
+    function deleteFavorites(){
+      global $mysqli;
+      $id     = (!empty($_REQUEST['id']) ? $_REQUEST['id'] : '');
+      $usuario = (!empty($_REQUEST['usuario']) ? $_REQUEST['usuario'] : '');
+
+      $sql = "DELETE FROM favoritos WHERE idUsuario = '".$usuario."' AND idLocacion = '".$id."'" ;
+      $result = $mysqli->query($sql);
+
+		  if ($result){	      
+        $response = array(			
+            "message" => 'Favorito eliminado.!!',  
+        );        
+      }else{
+          $response = array(			
+          "message" => 'Ha ocurrido un error.!',
+          );
+      }      
+      echo json_encode($response);
+    
+    }
+
     function listFavorites(){
       global $mysqli;
       $usuario     = (!empty($_REQUEST['usuario']) ? $_REQUEST['usuario'] : '');
 
-
       $query = "SELECT f.id, l.nombre, l.precio, l.imagen, l.status  FROM favoritos f 
                 LEFT  JOIN locaciones l ON l.id = f.idLocacion
                 WHERE f.idUsuario = $usuario";
+      
       if(!$result = $mysqli->query($query)){
         die($mysqli->error);  
       }
