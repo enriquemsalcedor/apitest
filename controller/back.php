@@ -90,16 +90,19 @@
 
           if($result1 == true){
             $response = array(			
-                "message" => 'Usuario registrado.!!',  
+                "message" => 'Usuario registrado.!!', 
+                "code" => 'ok' 
             );       
           }else{
             $response = array(			
                 "message" => 'Ha ocurrido un error.!',
+                "code" => 'error'
             );
           }      
       }else{
           $response = array(			
           "message" => 'Usuario ya existe.!',
+          "code" => 'failed'
           );
       }      
      
@@ -110,7 +113,9 @@
     function listLocations(){
       global $mysqli;
 
-      $query = "SELECT * FROM locaciones";
+      $query = "SELECT l.*, c.nombre as categoria, u.nombre as lugar FROM locaciones l
+                INNER JOIN lugares u ON l.idLugar = u.id
+                INNER JOIN categorias c ON l.idCategoria = c.id";
       if(!$result = $mysqli->query($query)){
         die($mysqli->error);  
       }
@@ -118,11 +123,13 @@
       $resultado = array();
       while($row = $result->fetch_assoc()){
         $resultado[] = array(
-          'id' 			=>	$row['id'],
-          'nombre' 	=>	$row['nombre'],
-          'precio'	=>	$row['precio'],
-          'imagen' 	=>	$row['imagen'],
-          'status' 	=>	$row['status'],
+          'id' 			   =>	$row['id'],
+          'nombre' 	   =>	$row['nombre'],
+          'precio'	   =>	$row['precio'],
+          'imagen' 	   =>	$row['imagen'],
+          'lugar' 	   =>	$row['lugar'],
+          'categoria'  =>	$row['categoria'],
+          'status' 	   =>	$row['status'],
         );
 
       }
