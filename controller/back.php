@@ -25,6 +25,12 @@
     case "getLocation":
       getLocation();
       break;
+    case "listCategories":
+      listCategories();
+      break;
+    case "listPlaces":
+      listPlaces();
+      break;
     case "addFavorites":
       addFavorites();
       break;
@@ -56,6 +62,9 @@
               if($row['status'] == 'Activo'){
                   $response = array(			
                       "message" => 'Bienvenido.!!',
+                      "nombre" => $row['nombre'],
+                      "apellido" => $row['apellido'],
+                      "id" => $row['id'],
                       "status" => $row['status']
                   );
               }else{
@@ -167,6 +176,52 @@
       
       echo json_encode($resultado);
 
+    }
+
+    function listCategories(){
+      global $mysqli;
+
+      $query = "SELECT * FROM categorias ORDER BY nombre ASC";
+      if(!$result = $mysqli->query($query)){
+        die($mysqli->error);  
+      }
+      $recordsTotal = $result->num_rows;
+      $resultado = array();
+      while($row = $result->fetch_assoc()){
+        $resultado[] = array(
+          'id' 			   =>	$row['id'],
+          'nombre' 	   =>	$row['nombre']
+        );
+
+      }
+      $response = array(			
+        "total" => intval($recordsTotal),
+        "data"  => $resultado
+      );
+      echo json_encode($response);
+    }
+
+    function listPlaces(){
+      global $mysqli;
+
+      $query = "SELECT * FROM lugares ORDER BY nombre ASC";
+      if(!$result = $mysqli->query($query)){
+        die($mysqli->error);  
+      }
+      $recordsTotal = $result->num_rows;
+      $resultado = array();
+      while($row = $result->fetch_assoc()){
+        $resultado[] = array(
+          'id' 			   =>	$row['id'],
+          'nombre' 	   =>	$row['nombre']
+        );
+
+      }
+      $response = array(			
+        "total" => intval($recordsTotal),
+        "data"  => $resultado
+      );
+      echo json_encode($response);
     }
 
     function addFavorites(){
