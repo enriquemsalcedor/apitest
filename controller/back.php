@@ -124,10 +124,24 @@
 
     function listLocations(){
       global $mysqli;
+      $categoria  = (!empty($_REQUEST['categoria']) ? $_REQUEST['categoria'] : '');
+      $lugar  = (!empty($_REQUEST['lugar']) ? $_REQUEST['lugar'] : '');
+
 
       $query = "SELECT l.*, c.nombre as categoria, u.nombre as lugar FROM locaciones l
                 INNER JOIN lugares u ON l.idLugar = u.id
-                INNER JOIN categorias c ON l.idCategoria = c.id";
+                INNER JOIN categorias c ON l.idCategoria = c.id 
+                WHERE 1=1";
+
+      if ($categoria != ''){
+        $query .= " AND l.idCategoria = $categoria";
+      }
+      if ($lugar != ''){
+        $query .= " AND l.idLugar = $lugar";
+      }
+
+      echo $query;
+
       if(!$result = $mysqli->query($query)){
         die($mysqli->error);  
       }
