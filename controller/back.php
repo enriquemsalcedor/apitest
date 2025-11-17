@@ -34,6 +34,9 @@
     case "deleteFavorites":
       deleteFavorites();
       break;
+    case "rent":
+      rent();
+      break;
 		default:
       echo "{failure:true}";
       break;
@@ -240,6 +243,36 @@
 
       }      
       echo json_encode($resultado);
+
+    }
+
+    function rent(){
+      global $mysqli;
+      $usuario     = (!empty($_REQUEST['usuario']) ? $_REQUEST['usuario'] : '');
+      $locacion     = (!empty($_REQUEST['idlocacion']) ? $_REQUEST['idlocacion'] : '');
+      $fecha     = (!empty($_REQUEST['fecha']) ? $_REQUEST['fecha'] : '');
+
+      $sql = "SELECT * FROM alquiler WHERE idLocacion = $locacion AND fecha = '$fecha'";
+      $result = $mysqli->query($sql);
+      $row = $result->fetch_assoc();
+
+      if ($result->num_rows==0){
+        $query 	= '	INSERT INTO	alquiler (idUsuario, idLocacion, fecha ) VALUES ( "'.$usuario.'", "'.$locacion.'", "'.$fecha.'") ';
+        $result1 = $mysqli->query($query);
+        if($result1){
+          $response = array(			
+            "message" => 'Felicidades reservacion exitosa.!!',  
+            "code"    => 'ok'
+          );   
+        }
+      }else{
+        $response = array(			
+          "message" => 'La localidad ya esta reservada para la fecha.!!',  
+          "code"    => 'failed'
+        );   
+      }
+
+      echo json_encode($response);
 
     }
     //********* */
