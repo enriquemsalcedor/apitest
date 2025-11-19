@@ -43,6 +43,15 @@
     case "rent":
       rent();
       break;
+    case "showProfile":
+      showProfile();
+      break;
+    case "updateProfile":
+      updateProfile();
+      break;
+    case "updatePassword":
+      updatePassword();
+      break;
 		default:
       echo "{failure:true}";
       break;
@@ -126,11 +135,14 @@
       global $mysqli;
       $categoria  = (!empty($_REQUEST['categoria']) ? $_REQUEST['categoria'] : '');
       $lugar  = (!empty($_REQUEST['lugar']) ? $_REQUEST['lugar'] : '');
+      $recordmin  = (!empty($_REQUEST['recordmin']) ? $_REQUEST['recordmin'] : '');
+      $recordtop = (!empty($_REQUEST['recordtop']) ? $_REQUEST['recordtop'] : '');
 
-
-      $query = "SELECT l.*, c.nombre as categoria, u.nombre as lugar FROM locaciones l
+      $query = "SELECT DISTINCT l.*, c.nombre as categoria, u.nombre as lugar, COUNT(a.idLocacion) as record 
+                FROM locaciones l
                 INNER JOIN lugares u ON l.idLugar = u.id
                 INNER JOIN categorias c ON l.idCategoria = c.id 
+                LEFT JOIN alquiler a ON a.idLocacion = l.id 
                 WHERE 1=1";
 
       if ($categoria != ''){
@@ -140,7 +152,11 @@
         $query .= " AND l.idLugar = $lugar";
       }
 
-      echo $query;
+      $query .= " GROUP by a.idLocacion, l.id";
+
+      if ($recordmin != '' && $recordtop != ''){
+        $query .= " HAVING COUNT(a.idLocacion) BETWEEN $recordmin AND $recordtop ";
+      }
 
       if(!$result = $mysqli->query($query)){
         die($mysqli->error);  
@@ -171,7 +187,12 @@
       global $mysqli;
       $id     = (!empty($_REQUEST['id']) ? $_REQUEST['id'] : '');
 
-      $query = "SELECT * FROM locaciones WHERE id = $id";
+      $query = "SELECT DISTINCT l.*, c.nombre as categoria, u.nombre as lugar, COUNT(a.idLocacion) as record 
+                FROM locaciones l
+                INNER JOIN lugares u ON l.idLugar = u.id
+                INNER JOIN categorias c ON l.idCategoria = c.id 
+                LEFT JOIN alquiler a ON a.idLocacion = l.id  
+                WHERE l.id = $id GROUP BY a.idLocacion, l.id";
       if(!$result = $mysqli->query($query)){
         die($mysqli->error);  
       }
@@ -186,6 +207,9 @@
         'imagen2' 	=>	$row['imagen2'],
         'imagen3' 	=>	$row['imagen3'],
         'status' 	  =>	$row['status'],
+        'categoria' =>	$row['categoria'],
+        'lugar' =>	$row['lugar'],
+        'record' =>	$row['record'],
       );
       
       echo json_encode($resultado);
@@ -344,7 +368,84 @@
       echo json_encode($response);
 
     }
-    //********* */
 
+    function showProfile(){
+      global $mysqli;
+      $id     = (!empty($_REQUEST['id']) ? $_REQUEST['id'] : '');
+
+      $query = "SELECT * FROM usuarios WHERE id = $id";
+      if(!$result = $mysqli->query($query)){
+        die($mysqli->error);  
+      }
+      $row = $result->fetch_assoc();
+      $resultado = array();
+      $resultado[] = array(
+        'id' 			  =>	$row['id'],
+        'nombre' 	  =>	$row['nombre'],
+        'apellido'	  =>	$row['apellido'],
+        'cedula' 	  =>	$row['cedula'],
+        'email' 	=>	$row['email'],
+        'fecha_nac' 	=>	$row['fecha_nac']
+      );
+      
+      echo json_encode($resultado);
+
+    }
+
+    function updateProfile(){
+      global $mysqli;
+      $nombre     = (!empty($_REQUEST['nombre']) ? $_REQUEST['nombre'] : '');
+      $apellido   = (!empty($_REQUEST['apellido']) ? $_REQUEST['apellido'] : '');
+      $cedula     = (!empty($_REQUEST['cedula']) ? $_REQUEST['cedula'] : '');
+      $fecha_nac  = (!empty($_REQUEST['fecha_nac']) ? $_REQUEST['fecha_nac'] : '');
+	    $id  = (!empty($_REQUEST['id']) ? $_REQUEST['id'] : '');
+
+      $query 	= "	UPDATE usuarios SET
+            nombre = '".$nombre."', 
+            apellido = '".$apellido."', 
+            cedula = '".$cedula."',
+            fecha_nac = '".$fecha_nac."'
+            WHERE id = $id ";
+
+          $result1 = $mysqli->query($query);
+
+          if($result1 == true){
+            $response = array(			
+                "message" => 'Perfil actualizado.!!', 
+                "code" => 'ok' 
+            );       
+          }else{
+            $response = array(			
+                "message" => 'Ha ocurrido un error.!',
+                "code" => 'error'
+            );
+          }  
+     
+      echo json_encode($response);
+    
+    }
+
+    function updatePassword(){
+      global $mysqli;
+      $clave  = (!empty($_REQUEST['clave']) ? $_REQUEST['clave'] : '');
+      $id     = (!empty($_REQUEST['id']) ? $_REQUEST['id'] : '');
+
+      $query 	= "UPDATE usuarios SET clave = '".$clave."' WHERE id = $id ";
+          $result = $mysqli->query($query);
+          if($result){
+            $response = array(			
+                "message" => 'Contraseña actualizada.!!', 
+                "code" => 'ok' 
+            ); 
+          }else{
+            $response = array(			
+                "message" => 'Ha ocurrido un error.!!',  
+                "code" => 'error' 
+            ); 
+          }    
+
+      echo json_encode($response);
+    }
+    //********* 
 	
 ?>
