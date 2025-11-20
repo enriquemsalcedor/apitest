@@ -52,6 +52,9 @@
     case "updatePassword":
       updatePassword();
       break;
+    case "listHistorial":
+      listHistorial();
+      break;
 		default:
       echo "{failure:true}";
       break;
@@ -445,6 +448,43 @@
           }    
 
       echo json_encode($response);
+    }
+
+    function listHistorial(){
+      global $mysqli;
+      $id     = (!empty($_REQUEST['id']) ? $_REQUEST['id'] : '');
+
+      $query = "SELECT l.*, c.nombre as categoria, u.nombre as lugar, a.fecha
+                FROM locaciones l
+                INNER JOIN lugares u ON l.idLugar = u.id
+                INNER JOIN categorias c ON l.idCategoria = c.id 
+                LEFT JOIN alquiler a ON a.idLocacion = l.id  
+                WHERE a.idUsuario = $id";
+      if(!$result = $mysqli->query($query)){
+        die($mysqli->error);  
+      }
+
+      $recordsTotal = $result->num_rows;
+      while($row = $result->fetch_assoc()){
+        $resultado[] = array(
+          'id' 			   =>	$row['id'],
+          'nombre' 	   =>	$row['nombre'],
+          'precio'	   =>	$row['precio'],
+          'imagen' 	   =>	$row['imagen'],
+          'lugar' 	   =>	$row['lugar'],
+          'categoria'  =>	$row['categoria'],
+          'status' 	   =>	$row['status'],
+          'fecha_alquiler' => $row['fecha'],
+        );
+
+      }
+      $response = array(			
+        "total" => intval($recordsTotal),
+        "data"  => $resultado
+      );
+      
+      echo json_encode($resultado);
+
     }
     //********* 
 	
